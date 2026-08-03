@@ -1,0 +1,6 @@
+{
+  "name": "SG60 Vouchers",
+  "description": "Official SG60 Vouchers portal for citizens to claim, select, and redeem digital vouchers at merchants and supermarkets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
