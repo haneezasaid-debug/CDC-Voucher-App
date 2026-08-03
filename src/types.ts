@@ -37,4 +37,4 @@ export interface HouseholdInfo {
   totalSupermarketBalance: number;
 }
 
-export type ActiveScreen = 'dashboard' | 'select' | 'redeem';
+export type ActiveScreen = 'dashboard' | 'select' | 'redeem' | 'comparison';

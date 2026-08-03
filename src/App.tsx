@@ -23,9 +23,11 @@ import { ShareModal } from './components/ShareModal';
 import { InfoHelpModal } from './components/InfoHelpModal';
 import { HistoryModal } from './components/HistoryModal';
 import { WhereToUseModal } from './components/WhereToUseModal';
+import { RedesignComparisonView } from './components/RedesignComparisonView';
+import { Smartphone, Layers } from 'lucide-react';
 
 export default function App() {
-  const [activeScreen, setActiveScreen] = useState<ActiveScreen>('dashboard');
+  const [activeScreen, setActiveScreen] = useState<ActiveScreen>('comparison'); // Default or accessible comparison view
   const [selectedCategory, setSelectedCategory] = useState<VoucherCategory>('sg60');
   const [language, setLanguage] = useState<Language>('en');
 
@@ -226,93 +228,135 @@ export default function App() {
   };
 
   return (
-    <div className="bg-gov-navy min-h-screen font-sans antialiased text-gray-900 flex flex-col justify-between">
-      {/* Container Wrapper */}
-      <div className="w-full max-w-md mx-auto min-h-screen relative flex flex-col bg-gov-navy">
-        {/* Top Government Banner */}
-        <GovBanner
-          language={language}
-          onOpenIdentifyModal={() => setIsIdentifyModalOpen(true)}
-        />
+    <div className="bg-slate-900 min-h-screen font-sans antialiased text-gray-900 flex flex-col justify-between">
+      {/* Top Global Mode Navigation Bar */}
+      <div className="bg-slate-950 text-slate-200 border-b border-slate-800 py-2.5 px-4 sticky top-0 z-50 shadow-md">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-ping"></span>
+            <span className="text-xs font-bold tracking-wider uppercase text-slate-300">
+              SG60 Redesign Project
+            </span>
+          </div>
 
-        {/* Dashboard Navigation Bar (Logo + Language Toggle) */}
-        {activeScreen === 'dashboard' && (
-          <Navbar language={language} onLanguageChange={setLanguage} />
-        )}
+          <div className="flex items-center space-x-2 bg-slate-900 p-1 rounded-full border border-slate-800">
+            <button
+              onClick={() => setActiveScreen('comparison')}
+              className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                activeScreen === 'comparison'
+                  ? 'bg-teal-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Side-by-Side Comparison</span>
+            </button>
 
-        {/* Main View Switcher */}
-        <div className="flex-1">
-          {activeScreen === 'dashboard' && (
-            <DashboardView
-              household={household}
-              sg60Balance={currentSG60Balance}
-              supermarketBalance={currentSupermarketBalance}
-              language={language}
-              onSelectCategory={handleSelectCategory}
-              onOpenHistory={() => setIsHistoryModalOpen(true)}
-              onOpenShare={() => setIsShareModalOpen(true)}
-              onOpenInfo={() => setIsInfoModalOpen(true)}
-            />
-          )}
-
-          {activeScreen === 'select' && (
-            <VoucherSelectView
-              category={selectedCategory}
-              balance={selectedCategory === 'sg60' ? currentSG60Balance : currentSupermarketBalance}
-              language={language}
-              onBack={() => setActiveScreen('dashboard')}
-              onOpenWhereToUse={() => setIsWhereToUseModalOpen(true)}
-              onConfirmRedemption={handleConfirmRedemptionByAmount}
-            />
-          )}
-
-          {activeScreen === 'redeem' && (
-            <VoucherRedeemView
-              category={selectedCategory}
-              selectedVouchers={selectedVouchersForRedeem}
-              language={language}
-              onBack={() => setActiveScreen('select')}
-              onConfirmRedemption={handleConfirmRedemption}
-            />
-          )}
+            <button
+              onClick={() => setActiveScreen('select')}
+              className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                activeScreen !== 'comparison'
+                  ? 'bg-teal-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Interactive Revamped App</span>
+            </button>
+          </div>
         </div>
-
-        {/* Bottom Simulated Mobile Browser Navigation Bar */}
-        <BrowserBar
-          onBack={handleGlobalBack}
-          canGoBack={activeScreen !== 'dashboard'}
-        />
-
-        {/* Modals */}
-        <HowToIdentifyModal
-          isOpen={isIdentifyModalOpen}
-          onClose={() => setIsIdentifyModalOpen(false)}
-        />
-
-        <ShareModal
-          isOpen={isShareModalOpen}
-          onClose={() => setIsShareModalOpen(false)}
-          household={household}
-        />
-
-        <InfoHelpModal
-          isOpen={isInfoModalOpen}
-          onClose={() => setIsInfoModalOpen(false)}
-        />
-
-        <HistoryModal
-          isOpen={isHistoryModalOpen}
-          onClose={() => setIsHistoryModalOpen(false)}
-          transactions={transactions}
-          onResetBalance={handleResetBalance}
-        />
-
-        <WhereToUseModal
-          isOpen={isWhereToUseModalOpen}
-          onClose={() => setIsWhereToUseModalOpen(false)}
-          category={selectedCategory}
-        />
       </div>
+
+      {activeScreen === 'comparison' ? (
+        <RedesignComparisonView onBackToApp={() => setActiveScreen('select')} />
+      ) : (
+        /* Container Wrapper */
+        <div className="w-full max-w-md mx-auto min-h-screen relative flex flex-col bg-gov-navy shadow-2xl my-0 sm:my-4 sm:rounded-3xl overflow-hidden border border-slate-800">
+          {/* Top Government Banner */}
+          <GovBanner
+            language={language}
+            onOpenIdentifyModal={() => setIsIdentifyModalOpen(true)}
+          />
+
+          {/* Dashboard Navigation Bar (Logo + Language Toggle) */}
+          {activeScreen === 'dashboard' && (
+            <Navbar language={language} onLanguageChange={setLanguage} />
+          )}
+
+          {/* Main View Switcher */}
+          <div className="flex-1">
+            {activeScreen === 'dashboard' && (
+              <DashboardView
+                household={household}
+                sg60Balance={currentSG60Balance}
+                supermarketBalance={currentSupermarketBalance}
+                language={language}
+                onSelectCategory={handleSelectCategory}
+                onOpenHistory={() => setIsHistoryModalOpen(true)}
+                onOpenShare={() => setIsShareModalOpen(true)}
+                onOpenInfo={() => setIsInfoModalOpen(true)}
+              />
+            )}
+
+            {activeScreen === 'select' && (
+              <VoucherSelectView
+                category={selectedCategory}
+                balance={selectedCategory === 'sg60' ? currentSG60Balance : currentSupermarketBalance}
+                language={language}
+                onBack={() => setActiveScreen('dashboard')}
+                onOpenWhereToUse={() => setIsWhereToUseModalOpen(true)}
+                onConfirmRedemption={handleConfirmRedemptionByAmount}
+              />
+            )}
+
+            {activeScreen === 'redeem' && (
+              <VoucherRedeemView
+                category={selectedCategory}
+                selectedVouchers={selectedVouchersForRedeem}
+                language={language}
+                onBack={() => setActiveScreen('select')}
+                onConfirmRedemption={handleConfirmRedemption}
+              />
+            )}
+          </div>
+
+          {/* Bottom Simulated Mobile Browser Navigation Bar */}
+          <BrowserBar
+            onBack={handleGlobalBack}
+            canGoBack={activeScreen !== 'dashboard'}
+          />
+
+          {/* Modals */}
+          <HowToIdentifyModal
+            isOpen={isIdentifyModalOpen}
+            onClose={() => setIsIdentifyModalOpen(false)}
+          />
+
+          <ShareModal
+            isOpen={isShareModalOpen}
+            onClose={() => setIsShareModalOpen(false)}
+            household={household}
+          />
+
+          <InfoHelpModal
+            isOpen={isInfoModalOpen}
+            onClose={() => setIsInfoModalOpen(false)}
+          />
+
+          <HistoryModal
+            isOpen={isHistoryModalOpen}
+            onClose={() => setIsHistoryModalOpen(false)}
+            transactions={transactions}
+            onResetBalance={handleResetBalance}
+          />
+
+          <WhereToUseModal
+            isOpen={isWhereToUseModalOpen}
+            onClose={() => setIsWhereToUseModalOpen(false)}
+            category={selectedCategory}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -129,9 +129,9 @@ export const VoucherSelectView: React.FC<VoucherSelectViewProps> = ({
   const handleGenerateQr = () => {
     if (isValidAmount) {
       setGeneratedAmount(numAmount);
-      setShowQrCard(true);
+      setShowQrCard(true); // Now acts as navigating to Screen 2 (QR Screen)
       setIsRedeemed(false);
-      setShowKeypad(false); // Dismiss keypad on QR generation so full QR card is clearly visible
+      setShowKeypad(false);
     }
   };
 
@@ -155,6 +155,179 @@ export const VoucherSelectView: React.FC<VoucherSelectViewProps> = ({
 
   const qrPayload = `https://redeem.gov.sg/v1/scan?category=${category}&amount=${generatedAmount}&t=${Date.now()}`;
 
+  // SCREEN 2: DEDICATED QR DISPLAY PAGE
+  if (showQrCard && generatedAmount !== null) {
+    return (
+      <div className="bg-gray-50 min-h-screen text-gray-900 select-none pb-28">
+        {/* Header Section for Screen 2 */}
+        <header
+          className={`${
+            isSupermarket ? 'header-pattern-supermarket' : 'header-pattern'
+          } pt-6 pb-10 px-6 text-white relative overflow-hidden max-w-md mx-auto shadow-md`}
+        >
+          <div className="relative z-10">
+            {/* Back Navigation Button to Screen 1 */}
+            <button
+              onClick={() => {
+                setShowQrCard(false);
+                setShowKeypad(true);
+              }}
+              className="flex items-center text-white font-semibold mb-5 text-base hover:opacity-80 transition-opacity cursor-pointer"
+            >
+              <ChevronLeft className="w-5 h-5 mr-1" />
+              <span>Back</span>
+            </button>
+
+            {/* Screen Title */}
+            <h1 className="text-3xl font-extrabold tracking-tight mb-5">{headerTitle}</h1>
+
+            {/* Where To Use Pill Button */}
+            <button
+              onClick={onOpenWhereToUse}
+              className="flex items-center bg-[#004d40] hover:bg-[#00362d] text-white px-5 py-2.5 rounded-full font-semibold text-xs sm:text-sm shadow-sm active:scale-95 transition-all cursor-pointer"
+            >
+              <MapPin className="w-4 h-4 mr-2 text-teal-200" />
+              <span>{t.whereToUse}</span>
+            </button>
+          </div>
+
+          <div className="absolute right-[-10%] top-[10%] opacity-20 pointer-events-none">
+            <svg fill="white" height="260" viewBox="0 0 200 300" width="180">
+              <path d="M180 50 Q160 0 100 0 T20 50 Q0 100 50 150 T100 250 Q150 300 200 250 T180 50" />
+            </svg>
+          </div>
+        </header>
+
+        {/* Main Content Area for QR Screen */}
+        <main className="relative -mt-4 bg-white rounded-t-3xl min-h-[70vh] px-5 pt-7 pb-10 max-w-md mx-auto shadow-xl">
+          {isRedeemed ? (
+            /* Redemption Completed Message State */
+            <div className="bg-white rounded-2xl shadow-xl p-6 text-center border border-gray-100 animate-scale-up my-4">
+              <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 text-emerald-600">
+                <Sparkles className="w-7 h-7" />
+              </div>
+
+              <h2 className="text-xl font-extrabold text-gray-900 mb-1">Redemption Successful!</h2>
+              <p className="text-xs text-gray-500 mb-5">
+                ${generatedAmount} has been deducted from your voucher balance.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRedeemed(false);
+                  setShowQrCard(false);
+                  setAmountInput('');
+                  setGeneratedAmount(null);
+                  setShowKeypad(true);
+                }}
+                className="w-full bg-gov-navy text-white py-3.5 rounded-full font-bold text-sm shadow-md cursor-pointer hover:bg-opacity-95"
+              >
+                Done
+              </button>
+            </div>
+          ) : (
+            /* Dedicated QR Card */
+            <div className="bg-white rounded-2xl shadow-xl p-6 relative border border-gray-100 animate-fade-in">
+              {/* Ticket Voucher Header */}
+              <div className="flex justify-between items-baseline mb-4 px-1">
+                <h2 className="text-2xl font-bold text-gray-800">{t.showToShop}</h2>
+                <div className="flex items-start">
+                  <span className="text-sm font-bold text-gray-800 mt-1 mr-0.5">$</span>
+                  <span className="text-5xl font-extrabold text-gray-900 tracking-tight">
+                    {generatedAmount}
+                  </span>
+                </div>
+              </div>
+
+              {/* Perforated Dashed Line Divider with Side Ticket Notches */}
+              <div className="relative flex items-center mb-6">
+                <div className="ticket-notch-left -ml-6"></div>
+                <div className="flex-grow border-t-2 border-dashed border-gray-200"></div>
+                <div className="ticket-notch-right -mr-6"></div>
+              </div>
+
+              {/* QR Code Container */}
+              <div className="flex flex-col items-center">
+                <div className="relative w-full aspect-square max-w-[240px] p-3 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center justify-center">
+                  <QRCodeSVG value={qrPayload} size={200} level="H" />
+
+                  {/* Floating Logo Badge in Center of QR */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-white p-1.5 rounded-lg shadow-md flex items-center space-x-1 border border-gray-200">
+                      <div className="bg-red-600 text-white text-[9px] font-extrabold px-1 py-0.5 rounded-xs">
+                        SG60
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-900">Vouchers</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Anti-Screenshot Security Watermark Banner */}
+                <div className="w-full mt-4 security-watermark border border-teal-200/60 rounded-xl p-2.5 flex items-center justify-center space-x-2 text-center shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                  <span className="text-[11px] font-mono font-bold text-teal-900 tracking-wide">
+                    {currentTime || 'VALID VOUCHER TIMESTAMP'}
+                  </span>
+                </div>
+
+                {/* Expiry Text */}
+                <p className="mt-3 text-xs text-gray-500 font-medium tracking-wide">
+                  {t.useBy}
+                </p>
+              </div>
+
+              {/* Merchant Scan Testing Simulator */}
+              <div className="mt-6 pt-5 border-t border-gray-100 bg-gray-50/80 -mx-6 -mb-6 p-5 rounded-b-2xl">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider flex items-center">
+                    <Store className="w-3.5 h-3.5 mr-1 text-teal-600" />
+                    Select Merchant Store
+                  </label>
+                  <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-semibold">
+                    Demo Scanner
+                  </span>
+                </div>
+
+                <select
+                  value={selectedMerchantId}
+                  onChange={(e) => setSelectedMerchantId(e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded-xl p-2.5 text-xs text-gray-800 font-medium focus:ring-2 focus:ring-teal-500 mb-3"
+                >
+                  {suitableMerchants.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name} ({m.area})
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={handleSimulateScan}
+                  disabled={isScanning}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-md"
+                >
+                  {isScanning ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Scanning voucher...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Simulate Merchant Scan (${generatedAmount})</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    );
+  }
+
+  // SCREEN 1: AMOUNT ENTRY & KEYPAD PAGE
   return (
     <div className={`bg-gray-50 min-h-screen text-gray-900 select-none ${showKeypad ? 'pb-96' : 'pb-28'}`}>
       {/* Header Section with Wave Pattern Background */}
@@ -255,131 +428,6 @@ export const VoucherSelectView: React.FC<VoucherSelectViewProps> = ({
             <span>Generate QR</span>
           </button>
         </div>
-
-        {/* Revealed QR Card on Same Screen */}
-        {showQrCard && generatedAmount !== null && !isRedeemed && (
-          <div className="mt-8 bg-white rounded-2xl shadow-xl p-6 relative border border-gray-100 transition-all duration-300 animate-slide-down">
-            {/* Ticket Voucher Header */}
-            <div className="flex justify-between items-baseline mb-4 px-1">
-              <h2 className="text-2xl font-bold text-gray-800">{t.showToShop}</h2>
-              <div className="flex items-start">
-                <span className="text-sm font-bold text-gray-800 mt-1 mr-0.5">$</span>
-                <span className="text-5xl font-extrabold text-gray-900 tracking-tight">
-                  {generatedAmount}
-                </span>
-              </div>
-            </div>
-
-            {/* Perforated Dashed Line Divider with Side Ticket Notches */}
-            <div className="relative flex items-center mb-6">
-              <div className="ticket-notch-left -ml-6"></div>
-              <div className="flex-grow border-t-2 border-dashed border-gray-200"></div>
-              <div className="ticket-notch-right -mr-6"></div>
-            </div>
-
-            {/* QR Code Container */}
-            <div className="flex flex-col items-center">
-              <div className="relative w-full aspect-square max-w-[240px] p-3 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center justify-center">
-                <QRCodeSVG value={qrPayload} size={200} level="H" />
-
-                {/* Floating Logo Badge in Center of QR */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="bg-white p-1.5 rounded-lg shadow-md flex items-center space-x-1 border border-gray-200">
-                    <div className="bg-red-600 text-white text-[9px] font-extrabold px-1 py-0.5 rounded-xs">
-                      SG60
-                    </div>
-                    <span className="text-[10px] font-bold text-gray-900">Vouchers</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Anti-Screenshot Security Watermark Banner */}
-              <div className="w-full mt-4 security-watermark border border-teal-200/60 rounded-xl p-2.5 flex items-center justify-center space-x-2 text-center shadow-xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                <span className="text-[11px] font-mono font-bold text-teal-900 tracking-wide">
-                  {currentTime || 'VALID VOUCHER TIMESTAMP'}
-                </span>
-              </div>
-
-              {/* Expiry Text */}
-              <p className="mt-3 text-xs text-gray-500 font-medium tracking-wide">
-                {t.useBy}
-              </p>
-            </div>
-
-            {/* Merchant Scan Testing Simulator */}
-            <div className="mt-6 pt-5 border-t border-gray-100 bg-gray-50/80 -mx-6 -mb-6 p-5 rounded-b-2xl">
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-[11px] font-bold text-gray-600 uppercase tracking-wider flex items-center">
-                  <Store className="w-3.5 h-3.5 mr-1 text-teal-600" />
-                  Select Merchant Store
-                </label>
-                <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-semibold">
-                  Demo Scanner
-                </span>
-              </div>
-
-              <select
-                value={selectedMerchantId}
-                onChange={(e) => setSelectedMerchantId(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-xl p-2.5 text-xs text-gray-800 font-medium focus:ring-2 focus:ring-teal-500 mb-3"
-              >
-                {suitableMerchants.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name} ({m.area})
-                  </option>
-                ))}
-              </select>
-
-              <button
-                type="button"
-                onClick={handleSimulateScan}
-                disabled={isScanning}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-md"
-              >
-                {isScanning ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Scanning voucher...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Simulate Merchant Scan (${generatedAmount})</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Redemption Completed Message State */}
-        {isRedeemed && generatedAmount !== null && (
-          <div className="mt-8 bg-white rounded-2xl shadow-xl p-6 text-center border border-gray-100 animate-scale-up">
-            <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 text-emerald-600">
-              <Sparkles className="w-7 h-7" />
-            </div>
-
-            <h2 className="text-xl font-extrabold text-gray-900 mb-1">Redemption Successful!</h2>
-            <p className="text-xs text-gray-500 mb-5">
-              ${generatedAmount} has been deducted from your voucher balance.
-            </p>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsRedeemed(false);
-                setShowQrCard(false);
-                setAmountInput('');
-                setGeneratedAmount(null);
-                setShowKeypad(true);
-              }}
-              className="w-full bg-gov-navy text-white py-3.5 rounded-full font-bold text-sm shadow-md cursor-pointer hover:bg-opacity-95"
-            >
-              Done
-            </button>
-          </div>
-        )}
       </main>
 
       {/* Custom On-Screen Numeric Keypad Docked to Bottom */}
