@@ -271,7 +271,7 @@ export default function App() {
         <RedesignComparisonView onBackToApp={() => setActiveScreen('select')} />
       ) : (
         /* Container Wrapper */
-        <div className="w-full max-w-md mx-auto min-h-screen relative flex flex-col bg-gov-navy shadow-2xl my-0 sm:my-4 sm:rounded-3xl overflow-hidden border border-slate-800">
+        <div className="w-full max-w-md mx-auto h-[calc(100vh-50px)] max-h-[760px] relative flex flex-col bg-gov-navy shadow-2xl my-1 sm:my-2 sm:rounded-2xl overflow-hidden border border-slate-800">
           {/* Top Government Banner */}
           <GovBanner
             language={language}
@@ -284,7 +284,7 @@ export default function App() {
           )}
 
           {/* Main View Switcher */}
-          <div className="flex-1">
+          <div className="flex-1 overflow-hidden flex flex-col">
             {activeScreen === 'dashboard' && (
               <DashboardView
                 household={household}
